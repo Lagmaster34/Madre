@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flor Floreciendo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; height: 100vh; width: 100vw; }
+  canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+  .scene { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
+  svg#flor { filter: drop-shadow(0 0 20px rgba(255,140,200,0.5)); overflow: visible; }
+  .tallo { stroke-dasharray: 320; stroke-dashoffset: 320; }
+  .hoja-g { opacity: 0; }
+  .petalo-g { opacity: 0; }
+  .centro-g { opacity: 0; }
+  .pistilo-g { opacity: 0; }
+  .rocio { opacity: 0; }
+  .aura { opacity: 0; transition: opacity 2s ease; }
+  .titulo {
+    position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0); font-size: 14px; letter-spacing: 8px;
+    text-transform: uppercase; white-space: nowrap; transition: color 1.5s ease;
+    font-family: Georgia, serif;
+  }
+  .titulo.visible { color: rgba(255,255,255,0.3); }
+  .btn-replay {
+    position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+    padding: 7px 24px; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    background: transparent; border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.35); border-radius: 30px; cursor: pointer;
+    opacity: 0; font-family: Georgia, serif;
+    transition: border-color 0.3s, color 0.3s, background 0.3s;
+  }
+  .btn-replay:hover { border-color: rgba(255,170,210,0.6); color: rgba(255,170,210,0.85); background: rgba(255,140,180,0.06); }
+  .btn-replay.visible { opacity: 1; transition: opacity 1s ease 0.3s, border-color 0.3s, color 0.3s; }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="scene">
+  <svg id="flor" viewBox="0 0 420 520" width="380" height="480">
+    <defs>
+      <radialGradient id="gP1" cx="50%" cy="80%" r="60%">
+        <stop offset="0%" stop-color="#ffe4f0"/>
+        <stop offset="50%" stop-color="#f77fbe"/>
+        <stop offset="100%" stop-color="#c0368a"/>
+      </radialGradient>
+      <radialGradient id="gP2" cx="50%" cy="80%" r="60%">
+        <stop offset="0%" stop-color="#fff0f8"/>
+        <stop offset="50%" stop-color="#f9a0cc"/>
+        <stop offset="100%" stop-color="#d040a0"/>
+      </radialGradient>
+      <radialGradient id="gP3" cx="50%" cy="80%" r="60%">
+        <stop offset="0%" stop-color="#fff4fa"/>
+        <stop offset="50%" stop-color="#fcb8d8"/>
+        <stop offset="100%" stop-color="#e055aa"/>
+      </radialGradient>
+      <radialGradient id="gCentro" cx="38%" cy="32%" r="65%">
+        <stop offset="0%" stop-color="#fff8c0"/>
+        <stop offset="40%" stop-color="#f9c740"/>
+        <stop offset="100%" stop-color="#b07010"/>
+      </radialGradient>
+      <radialGradient id="gCentroIn" cx="38%" cy="32%" r="60%">
+        <stop offset="0%" stop-color="#ffe86a"/>
+        <stop offset="60%" stop-color="#e07808"/>
+        <stop offset="100%" stop-color="#7a3c00"/>
+      </radialGradient>
+      <linearGradient id="gTallo" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#246614"/>
+        <stop offset="50%" stop-color="#4cb836"/>
+        <stop offset="100%" stop-color="#246614"/>
+      </linearGradient>
+      <linearGradient id="gH1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7ed65e"/><stop offset="100%" stop-color="#2a7018"/>
+      </linearGradient>
+      <linearGradient id="gH2" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#66c84a"/><stop offset="100%" stop-color="#225812"/>
+      </linearGradient>
+      <radialGradient id="gAura" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(255,100,180,0.20)"/>
+        <stop offset="55%" stop-color="rgba(200,70,140,0.07)"/>
+        <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+      </radialGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glowS">
+        <feGaussianBlur stdDeviation="2" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <ellipse class="aura" id="aura" cx="210" cy="265" rx="145" ry="155" fill="url(#gAura)"/>
+
+    <g id="pasto" style="opacity:0">
+      <path d="M132 430 Q127 412 131 394" stroke="#3a882a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M144 433 Q156 413 149 391" stroke="#4ea83a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M157 432 Q152 416 155 399" stroke="#3a882a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M261 429 Q256 410 260 392" stroke="#3a882a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M273 431 Q284 411 276 389" stroke="#4ea83a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M285 433 Q280 415 283 397" stroke="#3a882a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="210" cy="438" rx="88" ry="10" fill="rgba(55,30,8,0.5)"/>
+      <ellipse cx="210" cy="436" rx="72" ry="6" fill="rgba(85,50,12,0.4)"/>
+    </g>
+
+    <path class="tallo" id="tallo" d="M210 430 C207 398 204 365 208 335 C211 305 204 282 210 265" stroke="url(#gTallo)" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path class="tallo" id="talloD" d="M210 430 C208 398 205 365 209 335 C212 305 205 282 211 265" stroke="rgba(160,255,100,0.22)" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="320" stroke-dashoffset="320"/>
+
+    <g class="hoja-g" id="hIzqG" style="transform-origin:200px 338px; transform:scale(0) rotate(-18deg)">
+      <path d="M200 340 C168 320 138 303 144 268 C164 284 188 306 200 340Z" fill="url(#gH1)" stroke="#246614" stroke-width="0.8"/>
+      <path d="M200 340 C173 314 155 290 147 272" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <path d="M175 317 C170 307 164 297 162 288" stroke="rgba(255,255,255,0.12)" stroke-width="0.7" fill="none"/>
+    </g>
+    <g class="hoja-g" id="hDerG" style="transform-origin:220px 313px; transform:scale(0) rotate(15deg)">
+      <path d="M220 315 C252 294 280 278 274 243 C253 260 228 284 220 315Z" fill="url(#gH2)" stroke="#225812" stroke-width="0.8"/>
+      <path d="M220 315 C249 290 268 266 272 247" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <path d="M244 295 C250 286 254 276 256 267" stroke="rgba(255,255,255,0.12)" stroke-width="0.7" fill="none"/>
+    </g>
+    <g class="hoja-g" id="hIzqP" style="transform-origin:204px 294px; transform:scale(0) rotate(-12deg)">
+      <path d="M204 296 C183 280 166 268 171 248 C186 261 199 278 204 296Z" fill="#58b83c" stroke="#246614" stroke-width="0.6"/>
+      <path d="M204 296 C185 275 173 261 172 251" stroke="rgba(255,255,255,0.18)" stroke-width="0.8" fill="none"/>
+    </g>
+
+    <g id="petalosExt"></g>
+    <g id="petalosMed"></g>
+    <g id="petalosInt"></g>
+
+    <g class="centro-g" id="centroG">
+      <circle cx="212" cy="268" r="29" fill="rgba(0,0,0,0.4)"/>
+      <circle cx="210" cy="265" r="28" fill="url(#gCentro)" filter="url(#glowS)"/>
+      <circle cx="210" cy="265" r="19" fill="url(#gCentroIn)"/>
+      <circle cx="210" cy="265" r="11" fill="rgba(70,25,0,0.65)"/>
+      <circle cx="210" cy="265" r="6" fill="rgba(110,45,0,0.5)"/>
+      <circle cx="205" cy="260" r="4" fill="rgba(255,255,180,0.15)"/>
+    </g>
+
+    <g class="pistilo-g" id="pistiloG" filter="url(#glowS)"></g>
+    <g class="rocio" id="rocioG"></g>
+  </svg>
+  <p class="titulo" id="titulo">Floreciendo</p>
+  <button class="btn-replay" id="btnReplay" onclick="resetYAnimar()">↺ &nbsp; Florecer de nuevo</button>
+</div>
+
+<script>
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0, lastShoot = 0;
+const shootingStars = [];
+
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+const stars = Array.from({length:240}, () => ({
+  x: Math.random()*2000, y: Math.random()*1200,
+  r: Math.random()*1.6+0.2, a: Math.random()*0.7+0.1,
+  ts: Math.random()*0.02+0.005, tp: Math.random()*Math.PI*2,
+  dx: (Math.random()-0.5)*0.07, dy: (Math.random()-0.5)*0.025,
+}));
+
+const motas = Array.from({length:30}, () => ({
+  x: Math.random()*2000, y: Math.random()*1200,
+  r: Math.random()*3+1, a: Math.random()*0.14+0.03,
+  vx: (Math.random()-0.5)*0.18, vy: -(Math.random()*0.12+0.04),
+  p: Math.random()*Math.PI*2,
+}));
+
+const polvo = Array.from({length:45}, () => ({
+  x: Math.random()*2000, y: Math.random()*1200,
+  r: Math.random()*2+0.4, a: Math.random()*0.16+0.03,
+  vx: (Math.random()-0.5)*0.22, vy: -(Math.random()*0.14+0.04),
+  h: Math.random()*30+305, p: Math.random()*Math.PI*2,
+}));
+
+function spawnStar() {
+  shootingStars.push({
+    x: Math.random()*W*0.6+W*0.1, y: Math.random()*H*0.5,
+    len: Math.random()*130+60, speed: Math.random()*5+4,
+    a: 0, life: 0, maxLife: Math.random()*55+40,
+    angle: Math.PI/5+(Math.random()-0.5)*0.4,
+  });
+}
+
+function frame() {
+  t += 0.016;
+  ctx.clearRect(0,0,W,H);
+  const g = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.8);
+  g.addColorStop(0,'#0b0012'); g.addColorStop(0.5,'#06000a'); g.addColorStop(1,'#000');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  const ag = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,250);
+  ag.addColorStop(0,'rgba(170,50,120,0.07)'); ag.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = ag; ctx.fillRect(0,0,W,H);
+
+  const sx = W/2000, sy = H/1200;
+
+  stars.forEach(s => {
+    s.tp += s.ts; s.x += s.dx; s.y += s.dy;
+    if(s.x>2000)s.x=0; if(s.x<0)s.x=2000;
+    if(s.y>1200)s.y=0; if(s.y<0)s.y=1200;
+    const a = s.a*(0.55+0.45*Math.sin(s.tp));
+    ctx.beginPath(); ctx.arc(s.x*sx,s.y*sy,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fill();
+    if(s.r>1.15){
+      ctx.beginPath(); ctx.arc(s.x*sx,s.y*sy,s.r*2.8,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${a*0.07})`; ctx.fill();
+    }
+  });
+
+  motas.forEach(m => {
+    m.p+=0.017; m.x+=m.vx; m.y+=m.vy;
+    if(m.x>2000)m.x=0; if(m.x<0)m.x=2000;
+    if(m.y<0)m.y=1200; if(m.y>1200)m.y=0;
+    const a=m.a*(0.7+0.3*Math.sin(m.p));
+    ctx.beginPath(); ctx.arc(m.x*sx,m.y*sy,m.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fill();
+  });
+
+  polvo.forEach(p => {
+    p.p+=0.02; p.x+=p.vx+Math.sin(p.p)*0.28; p.y+=p.vy;
+    if(p.y<0)p.y=1200; if(p.x>2000)p.x=0; if(p.x<0)p.x=2000;
+    const a=p.a*(0.6+0.4*Math.sin(p.p));
+    ctx.beginPath(); ctx.arc(p.x*sx,p.y*sy,p.r,0,Math.PI*2);
+    ctx.fillStyle=`hsla(${p.h},80%,82%,${a})`; ctx.fill();
+  });
+
+  if(t-lastShoot>2.5+Math.random()*5){spawnStar();lastShoot=t;}
+  for(let i=shootingStars.length-1;i>=0;i--){
+    const s=shootingStars[i];
+    s.life++; s.x+=Math.cos(s.angle)*s.speed; s.y+=Math.sin(s.angle)*s.speed;
+    const pr=s.life/s.maxLife;
+    s.a=pr<0.2?pr/0.2:1-(pr-0.2)/0.8;
+    const tx=s.x-Math.cos(s.angle)*s.len, ty=s.y-Math.sin(s.angle)*s.len;
+    const sg=ctx.createLinearGradient(tx,ty,s.x,s.y);
+    sg.addColorStop(0,'rgba(255,255,255,0)');
+    sg.addColorStop(0.7,`rgba(255,210,240,${s.a*0.45})`);
+    sg.addColorStop(1,`rgba(255,255,255,${s.a})`);
+    ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(s.x,s.y);
+    ctx.strokeStyle=sg; ctx.lineWidth=1.5; ctx.stroke();
+    if(s.life>=s.maxLife)shootingStars.splice(i,1);
+  }
+  requestAnimationFrame(frame);
+}
+frame();
+
+// SVG pétalos
+const NS='http://www.w3.org/2000/svg', CX=210, CY=265;
+
+function mkPetalo(container, cx, cy, rx, ry, rot, gid, opac, sc) {
+  const g = document.createElementNS(NS,'g');
+  g.classList.add('petalo-g');
+  g.style.transformOrigin=`${CX}px ${CY}px`;
+  g.style.transform=`rotate(${rot}deg) scale(0)`;
+  g.style.opacity='0';
+  const e = document.createElementNS(NS,'ellipse');
+  e.setAttribute('cx',cx); e.setAttribute('cy',cy);
+  e.setAttribute('rx',rx); e.setAttribute('ry',ry);
+  e.setAttribute('fill',`url(#${gid})`);
+  e.setAttribute('stroke',sc); e.setAttribute('stroke-width','0.6');
+  e.setAttribute('fill-opacity',opac);
+  g.appendChild(e);
+  const v = document.createElementNS(NS,'path');
+  v.setAttribute('d',`M${cx} ${cy+ry-8} Q${cx+rx*0.12} ${cy} ${cx} ${cy-ry+12}`);
+  v.setAttribute('stroke','rgba(255,255,255,0.2)');
+  v.setAttribute('stroke-width','0.9'); v.setAttribute('fill','none');
+  g.appendChild(v);
+  container.appendChild(g);
+  return g;
+}
+
+const extC=document.getElementById('petalosExt');
+const medC=document.getElementById('petalosMed');
+const intC=document.getElementById('petalosInt');
+const extP=[], medP=[], intP=[];
+
+for(let i=0;i<8;i++) extP.push(mkPetalo(extC,CX,CY-68,14,50,i*45,i%2?'gP2':'gP1','0.92','rgba(180,55,115,0.3)'));
+for(let i=0;i<8;i++) medP.push(mkPetalo(medC,CX,CY-52,12,38,i*45+22.5,i%2?'gP2':'gP3','0.86','rgba(200,75,135,0.22)'));
+for(let i=0;i<6;i++) intP.push(mkPetalo(intC,CX,CY-36,10,23,i*60,'gP1','0.88','rgba(220,95,145,0.18)'));
+
+// Pistilos
+const pg = document.getElementById('pistiloG');
+for(let i=0;i<20;i++){
+  const ang=(i/20)*Math.PI*2, r=15+(i%3)*4;
+  const dot=document.createElementNS(NS,'circle');
+  dot.setAttribute('cx',CX+Math.cos(ang)*r); dot.setAttribute('cy',CY+Math.sin(ang)*r);
+  dot.setAttribute('r',i%3===0?2.2:1.4);
+  dot.setAttribute('fill',i%3===0?'#ffe055':'#ffaa18');
+  pg.appendChild(dot);
+}
+
+// Rocío
+const rg=document.getElementById('rocioG');
+[[192,220,3.5],[226,216,2.8],[211,193,2.2],[239,237,3],[181,241,2.4]].forEach(([rx2,ry2,rr])=>{
+  const g2=document.createElementNS(NS,'g');
+  const c2=document.createElementNS(NS,'circle');
+  c2.setAttribute('cx',rx2);c2.setAttribute('cy',ry2);c2.setAttribute('r',rr);
+  c2.setAttribute('fill','rgba(215,238,255,0.65)');c2.setAttribute('stroke','rgba(255,255,255,0.8)');c2.setAttribute('stroke-width','0.5');
+  const sh=document.createElementNS(NS,'circle');
+  sh.setAttribute('cx',rx2-rr*0.32);sh.setAttribute('cy',ry2-rr*0.32);sh.setAttribute('r',rr*0.36);
+  sh.setAttribute('fill','rgba(255,255,255,0.9)');
+  g2.appendChild(c2);g2.appendChild(sh);rg.appendChild(g2);
+});
+
+const delay = ms => new Promise(r=>setTimeout(r,ms));
+
+async function animarFlor(){
+  document.getElementById('pasto').style.cssText+='transition:opacity 0.8s ease;opacity:1;';
+  await delay(450);
+
+  ['tallo','talloD'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.style.transition=`stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1) ${i*0.1}s`;
+    el.style.strokeDashoffset='0';
+  });
+  await delay(950);
+
+  for(const id of ['hIzqG','hDerG','hIzqP']){
+    const h=document.getElementById(id);
+    h.style.transition='opacity 0.5s ease, transform 0.7s cubic-bezier(0.34,1.56,0.64,1)';
+    h.style.opacity='1'; h.style.transform='scale(1) rotate(0deg)';
+    await delay(210);
+  }
+  await delay(280);
+
+  document.getElementById('aura').style.opacity='1';
+
+  for(let i=0;i<extP.length;i++){
+    const p=extP[i];
+    p.style.transition='opacity 0.45s ease, transform 0.55s cubic-bezier(0.34,1.56,0.64,1)';
+    p.style.transformOrigin=`${CX}px ${CY}px`;
+    p.style.transform=`rotate(${i*45}deg) scale(1)`; p.style.opacity='1';
+    await delay(88);
+  }
+  await delay(110);
+  for(let i=0;i<medP.length;i++){
+    const p=medP[i];
+    p.style.transition='opacity 0.4s ease, transform 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+    p.style.transformOrigin=`${CX}px ${CY}px`;
+    p.style.transform=`rotate(${i*45+22.5}deg) scale(1)`; p.style.opacity='1';
+    await delay(72);
+  }
+  await delay(90);
+  for(let i=0;i<intP.length;i++){
+    const p=intP[i];
+    p.style.transition='opacity 0.35s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)';
+    p.style.transformOrigin=`${CX}px ${CY}px`;
+    p.style.transform=`rotate(${i*60}deg) scale(1)`; p.style.opacity='1';
+    await delay(60);
+  }
+  await delay(140);
+
+  const cg=document.getElementById('centroG');
+  cg.style.transition='opacity 0.5s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+  cg.style.transformOrigin=`${CX}px ${CY}px`;
+  cg.style.opacity='1'; cg.style.transform='scale(1)';
+  await delay(280);
+
+  document.getElementById('pistiloG').style.cssText+='transition:opacity 0.5s ease;opacity:1;';
+  await delay(180);
+  document.getElementById('rocioG').style.cssText+='transition:opacity 0.9s ease;opacity:1;';
+  await delay(380);
+
+  document.getElementById('titulo').classList.add('visible');
+  document.getElementById('btnReplay').classList.add('visible');
+  iniciarBreeze();
+}
+
+let breezeRunning=false;
+function iniciarBreeze(){
+  if(breezeRunning)return; breezeRunning=true;
+  let f=0;
+  (function loop(){
+    f++;
+    extP.forEach((p,i)=>{
+      const w=Math.sin(f*0.016+i*0.7)*1.6;
+      p.style.transform=`rotate(${i*45+w}deg) scale(1)`;
+      p.style.transformOrigin=`${CX}px ${CY}px`;
+    });
+    medP.forEach((p,i)=>{
+      const w=Math.sin(f*0.018+i*0.8)*1.4;
+      p.style.transform=`rotate(${i*45+22.5+w}deg) scale(1)`;
+      p.style.transformOrigin=`${CX}px ${CY}px`;
+    });
+    intP.forEach((p,i)=>{
+      const w=Math.sin(f*0.022+i*1.0)*1.0;
+      p.style.transform=`rotate(${i*60+w}deg) scale(1)`;
+      p.style.transformOrigin=`${CX}px ${CY}px`;
+    });
+    requestAnimationFrame(loop);
+  })();
+}
+
+function resetYAnimar(){
+  breezeRunning=false;
+  ['tallo','talloD'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.transition='none'; el.style.strokeDashoffset='320';
+  });
+  ['hIzqG','hDerG','hIzqP'].forEach(id=>{
+    const h=document.getElementById(id);
+    h.style.transition='none'; h.style.opacity='0'; h.style.transform='scale(0)';
+  });
+  extP.forEach((p,i)=>{p.style.transition='none';p.style.opacity='0';p.style.transform=`rotate(${i*45}deg) scale(0)`;});
+  medP.forEach((p,i)=>{p.style.transition='none';p.style.opacity='0';p.style.transform=`rotate(${i*45+22.5}deg) scale(0)`;});
+  intP.forEach((p,i)=>{p.style.transition='none';p.style.opacity='0';p.style.transform=`rotate(${i*60}deg) scale(0)`;});
+  ['centroG','pistiloG','rocioG'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.transition='none'; el.style.opacity='0';
+    if(id==='centroG')el.style.transform='scale(0)';
+  });
+  document.getElementById('centroG').style.transformOrigin=`${CX}px ${CY}px`;
+  document.getElementById('aura').style.opacity='0';
+  document.getElementById('pasto').style.opacity='0';
+  document.getElementById('titulo').classList.remove('visible');
+  document.getElementById('btnReplay').classList.remove('visible');
+  setTimeout(animarFlor,80);
+}
+
+window.addEventListener('load',()=>setTimeout(animarFlor,700));
+</script>
+</body>
+</html>
