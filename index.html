@@ -3,73 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flor Floreciendo</title>
+<title>Para Cáterin Celenia 🌸</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap');
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #000; overflow: hidden; height: 100vh; width: 100vw; }
+  body { background: #000; overflow: hidden; height: 100vh; width: 100vw; font-family: 'Lato', sans-serif; }
+
   canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-  .scene { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
-  svg#flor { filter: drop-shadow(0 0 20px rgba(255,140,200,0.5)); overflow: visible; }
+
+  .scene {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 2;
+  }
+
+  svg#flor { filter: drop-shadow(0 0 22px rgba(255,140,200,0.55)); overflow: visible; }
+
   .tallo { stroke-dasharray: 320; stroke-dashoffset: 320; }
   .hoja-g { opacity: 0; }
   .petalo-g { opacity: 0; }
   .centro-g { opacity: 0; }
   .pistilo-g { opacity: 0; }
-  .rocio { opacity: 0; }
-  .aura { opacity: 0; transition: opacity 2s ease; }
-  .titulo {
-    position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
-    color: rgba(255,255,255,0); font-size: 14px; letter-spacing: 8px;
-    text-transform: uppercase; white-space: nowrap; transition: color 1.5s ease;
-    font-family: Georgia, serif;
+  .rocio-g { opacity: 0; }
+  .aura { opacity: 0; transition: opacity 2.5s ease; }
+
+  /* Flores secundarias */
+  .flor2 { opacity: 0; transition: opacity 1.2s ease; }
+
+  /* Mensaje */
+  .mensaje-overlay {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,0);
+    pointer-events: none;
+    transition: background 1.5s ease;
   }
-  .titulo.visible { color: rgba(255,255,255,0.3); }
-  .btn-replay {
+  .mensaje-overlay.show { background: rgba(0,0,0,0.72); pointer-events: all; }
+
+  .mensaje-card {
+    text-align: center;
+    padding: 48px 52px;
+    border: 1px solid rgba(255,180,210,0.18);
+    border-radius: 4px;
+    background: rgba(10,0,15,0.55);
+    backdrop-filter: blur(12px);
+    max-width: 480px;
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+    transition: opacity 1.2s ease 0.4s, transform 1.2s ease 0.4s;
+  }
+  .mensaje-card.show { opacity: 1; transform: translateY(0) scale(1); }
+
+  .msg-para {
+    font-family: 'Lato', sans-serif;
+    font-size: 11px; letter-spacing: 5px;
+    color: rgba(255,190,220,0.55);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .msg-nombre {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px; font-weight: 600;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 26px;
+    text-shadow: 0 0 30px rgba(255,140,200,0.5);
+  }
+  .msg-linea {
+    width: 48px; height: 1px;
+    background: rgba(255,160,200,0.35);
+    margin: 0 auto 28px;
+  }
+  .msg-texto {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; font-style: italic;
+    line-height: 1.9; color: rgba(255,230,240,0.88);
+    margin-bottom: 36px;
+  }
+  .msg-firma {
+    font-family: 'Lato', sans-serif;
+    font-size: 12px; letter-spacing: 4px;
+    color: rgba(255,180,210,0.4);
+    text-transform: uppercase;
+  }
+
+  .btn-cerrar {
+    margin-top: 32px;
+    padding: 9px 28px;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid rgba(255,180,210,0.25);
+    color: rgba(255,200,220,0.5);
+    border-radius: 30px; cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    transition: all 0.3s;
+  }
+  .btn-cerrar:hover { border-color: rgba(255,160,200,0.6); color: rgba(255,180,210,0.9); background: rgba(255,140,180,0.07); }
+
+  /* Footer */
+  .footer {
     position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
-    padding: 7px 24px; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-    background: transparent; border: 1px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.35); border-radius: 30px; cursor: pointer;
-    opacity: 0; font-family: Georgia, serif;
-    transition: border-color 0.3s, color 0.3s, background 0.3s;
+    display: flex; gap: 16px; align-items: center;
+    opacity: 0; transition: opacity 1.2s ease;
   }
-  .btn-replay:hover { border-color: rgba(255,170,210,0.6); color: rgba(255,170,210,0.85); background: rgba(255,140,180,0.06); }
-  .btn-replay.visible { opacity: 1; transition: opacity 1s ease 0.3s, border-color 0.3s, color 0.3s; }
+  .footer.show { opacity: 1; }
+
+  .btn-footer {
+    padding: 7px 20px; font-size: 11px; letter-spacing: 2.5px;
+    text-transform: uppercase; background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.3); border-radius: 30px; cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    transition: all 0.3s;
+  }
+  .btn-footer:hover { border-color: rgba(255,170,210,0.5); color: rgba(255,180,210,0.75); background: rgba(255,140,180,0.06); }
+
+  .corazon-float {
+    position: fixed; pointer-events: none; z-index: 3;
+    font-size: 18px; opacity: 0;
+    animation: floatUp 3.5s ease forwards;
+  }
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    15%  { opacity: 0.7; transform: translateY(-30px) scale(1); }
+    80%  { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(-160px) scale(0.8) rotate(15deg); }
+  }
+
+  /* Partículas de corazones pequeños en canvas */
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
+
 <div class="scene">
-  <svg id="flor" viewBox="0 0 420 520" width="380" height="480">
+  <!-- Flores secundarias izquierda -->
+  <svg class="flor2" id="florIzq" style="position:absolute;left:calc(50% - 240px);top:50%;transform:translateY(-48%) scale(0.52);transform-origin:center center;" viewBox="0 0 420 520" width="380" height="480">
+    <defs>
+      <radialGradient id="gP1b" cx="50%" cy="80%" r="60%">
+        <stop offset="0%" stop-color="#ffeef0"/><stop offset="50%" stop-color="#f9b0c8"/><stop offset="100%" stop-color="#c03878"/>
+      </radialGradient>
+    </defs>
+    <g id="florIzqG"></g>
+  </svg>
+
+  <!-- Flores secundarias derecha -->
+  <svg class="flor2" id="florDer" style="position:absolute;right:calc(50% - 240px);top:50%;transform:translateY(-48%) scale(0.52);transform-origin:center center;" viewBox="0 0 420 520" width="380" height="480">
+    <g id="florDerG"></g>
+  </svg>
+
+  <!-- Flor principal -->
+  <svg id="flor" viewBox="0 0 420 520" width="360" height="460">
     <defs>
       <radialGradient id="gP1" cx="50%" cy="80%" r="60%">
-        <stop offset="0%" stop-color="#ffe4f0"/>
-        <stop offset="50%" stop-color="#f77fbe"/>
-        <stop offset="100%" stop-color="#c0368a"/>
+        <stop offset="0%" stop-color="#ffe4f0"/><stop offset="50%" stop-color="#f77fbe"/><stop offset="100%" stop-color="#c0368a"/>
       </radialGradient>
       <radialGradient id="gP2" cx="50%" cy="80%" r="60%">
-        <stop offset="0%" stop-color="#fff0f8"/>
-        <stop offset="50%" stop-color="#f9a0cc"/>
-        <stop offset="100%" stop-color="#d040a0"/>
+        <stop offset="0%" stop-color="#fff0f8"/><stop offset="50%" stop-color="#f9a0cc"/><stop offset="100%" stop-color="#d040a0"/>
       </radialGradient>
       <radialGradient id="gP3" cx="50%" cy="80%" r="60%">
-        <stop offset="0%" stop-color="#fff4fa"/>
-        <stop offset="50%" stop-color="#fcb8d8"/>
-        <stop offset="100%" stop-color="#e055aa"/>
+        <stop offset="0%" stop-color="#fff4fa"/><stop offset="50%" stop-color="#fcb8d8"/><stop offset="100%" stop-color="#e055aa"/>
       </radialGradient>
       <radialGradient id="gCentro" cx="38%" cy="32%" r="65%">
-        <stop offset="0%" stop-color="#fff8c0"/>
-        <stop offset="40%" stop-color="#f9c740"/>
-        <stop offset="100%" stop-color="#b07010"/>
+        <stop offset="0%" stop-color="#fff8c0"/><stop offset="40%" stop-color="#f9c740"/><stop offset="100%" stop-color="#b07010"/>
       </radialGradient>
       <radialGradient id="gCentroIn" cx="38%" cy="32%" r="60%">
-        <stop offset="0%" stop-color="#ffe86a"/>
-        <stop offset="60%" stop-color="#e07808"/>
-        <stop offset="100%" stop-color="#7a3c00"/>
+        <stop offset="0%" stop-color="#ffe86a"/><stop offset="60%" stop-color="#e07808"/><stop offset="100%" stop-color="#7a3c00"/>
       </radialGradient>
       <linearGradient id="gTallo" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#246614"/>
-        <stop offset="50%" stop-color="#4cb836"/>
-        <stop offset="100%" stop-color="#246614"/>
+        <stop offset="0%" stop-color="#246614"/><stop offset="50%" stop-color="#4cb836"/><stop offset="100%" stop-color="#246614"/>
       </linearGradient>
       <linearGradient id="gH1" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stop-color="#7ed65e"/><stop offset="100%" stop-color="#2a7018"/>
@@ -78,21 +184,12 @@
         <stop offset="0%" stop-color="#66c84a"/><stop offset="100%" stop-color="#225812"/>
       </linearGradient>
       <radialGradient id="gAura" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="rgba(255,100,180,0.20)"/>
-        <stop offset="55%" stop-color="rgba(200,70,140,0.07)"/>
-        <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        <stop offset="0%" stop-color="rgba(255,100,180,0.22)"/><stop offset="55%" stop-color="rgba(200,70,140,0.08)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/>
       </radialGradient>
-      <filter id="glow">
-        <feGaussianBlur stdDeviation="3.5" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="glowS">
-        <feGaussianBlur stdDeviation="2" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
+      <filter id="glowS"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>
 
-    <ellipse class="aura" id="aura" cx="210" cy="265" rx="145" ry="155" fill="url(#gAura)"/>
+    <ellipse class="aura" id="aura" cx="210" cy="265" rx="150" ry="160" fill="url(#gAura)"/>
 
     <g id="pasto" style="opacity:0">
       <path d="M132 430 Q127 412 131 394" stroke="#3a882a" stroke-width="3" fill="none" stroke-linecap="round"/>
@@ -108,17 +205,16 @@
     <path class="tallo" id="tallo" d="M210 430 C207 398 204 365 208 335 C211 305 204 282 210 265" stroke="url(#gTallo)" stroke-width="9" fill="none" stroke-linecap="round"/>
     <path class="tallo" id="talloD" d="M210 430 C208 398 205 365 209 335 C212 305 205 282 211 265" stroke="rgba(160,255,100,0.22)" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="320" stroke-dashoffset="320"/>
 
-    <g class="hoja-g" id="hIzqG" style="transform-origin:200px 338px; transform:scale(0) rotate(-18deg)">
+    <g class="hoja-g" id="hIzqG" style="transform-origin:200px 338px;transform:scale(0) rotate(-18deg)">
       <path d="M200 340 C168 320 138 303 144 268 C164 284 188 306 200 340Z" fill="url(#gH1)" stroke="#246614" stroke-width="0.8"/>
       <path d="M200 340 C173 314 155 290 147 272" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none" stroke-linecap="round"/>
       <path d="M175 317 C170 307 164 297 162 288" stroke="rgba(255,255,255,0.12)" stroke-width="0.7" fill="none"/>
     </g>
-    <g class="hoja-g" id="hDerG" style="transform-origin:220px 313px; transform:scale(0) rotate(15deg)">
+    <g class="hoja-g" id="hDerG" style="transform-origin:220px 313px;transform:scale(0) rotate(15deg)">
       <path d="M220 315 C252 294 280 278 274 243 C253 260 228 284 220 315Z" fill="url(#gH2)" stroke="#225812" stroke-width="0.8"/>
       <path d="M220 315 C249 290 268 266 272 247" stroke="rgba(255,255,255,0.22)" stroke-width="1" fill="none" stroke-linecap="round"/>
-      <path d="M244 295 C250 286 254 276 256 267" stroke="rgba(255,255,255,0.12)" stroke-width="0.7" fill="none"/>
     </g>
-    <g class="hoja-g" id="hIzqP" style="transform-origin:204px 294px; transform:scale(0) rotate(-12deg)">
+    <g class="hoja-g" id="hIzqP" style="transform-origin:204px 294px;transform:scale(0) rotate(-12deg)">
       <path d="M204 296 C183 280 166 268 171 248 C186 261 199 278 204 296Z" fill="#58b83c" stroke="#246614" stroke-width="0.6"/>
       <path d="M204 296 C185 275 173 261 172 251" stroke="rgba(255,255,255,0.18)" stroke-width="0.8" fill="none"/>
     </g>
@@ -137,155 +233,189 @@
     </g>
 
     <g class="pistilo-g" id="pistiloG" filter="url(#glowS)"></g>
-    <g class="rocio" id="rocioG"></g>
+    <g class="rocio-g" id="rocioG"></g>
   </svg>
-  <p class="titulo" id="titulo">Floreciendo</p>
-  <button class="btn-replay" id="btnReplay" onclick="resetYAnimar()">↺ &nbsp; Florecer de nuevo</button>
+
+  <div class="footer" id="footer">
+    <button class="btn-footer" onclick="mostrarMensaje()">💌 Ver mensaje</button>
+    <button class="btn-footer" onclick="resetYAnimar()">↺ Florecer</button>
+  </div>
+</div>
+
+<!-- Overlay mensaje -->
+<div class="mensaje-overlay" id="mensajeOverlay">
+  <div class="mensaje-card" id="mensajeCard">
+    <p class="msg-para">Para</p>
+    <p class="msg-nombre">Cáterin Celenia</p>
+    <div class="msg-linea"></div>
+    <p class="msg-texto">
+      Hay flores que florecen una vez al año,<br>
+      pero tú floreciste en mi vida para siempre.<br><br>
+      Gracias por cada abrazo que lo cura todo,<br>
+      por cada palabra que me da alas,<br>
+      y por el amor que no necesita explicación.<br><br>
+      Hoy y siempre, eres mi persona favorita en el mundo.
+    </p>
+    <div class="msg-linea"></div>
+    <p class="msg-firma">Con todo mi amor ✦ Feliz Día, Mamá</p>
+    <button class="btn-cerrar" onclick="cerrarMensaje()">Cerrar</button>
+  </div>
 </div>
 
 <script>
+// ── CANVAS ──────────────────────────────────────────────────────────
 const canvas = document.getElementById('bg');
 const ctx = canvas.getContext('2d');
 let W, H, t = 0, lastShoot = 0;
 const shootingStars = [];
+const heartsCanvas = [];
 
-function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
 resize(); window.addEventListener('resize', resize);
 
-const stars = Array.from({length:240}, () => ({
-  x: Math.random()*2000, y: Math.random()*1200,
-  r: Math.random()*1.6+0.2, a: Math.random()*0.7+0.1,
-  ts: Math.random()*0.02+0.005, tp: Math.random()*Math.PI*2,
-  dx: (Math.random()-0.5)*0.07, dy: (Math.random()-0.5)*0.025,
+const stars = Array.from({length:260},()=>({
+  x:Math.random()*2000,y:Math.random()*1200,
+  r:Math.random()*1.6+0.2,a:Math.random()*0.7+0.1,
+  ts:Math.random()*0.02+0.005,tp:Math.random()*Math.PI*2,
+  dx:(Math.random()-0.5)*0.07,dy:(Math.random()-0.5)*0.025
+}));
+const motas = Array.from({length:32},()=>({
+  x:Math.random()*2000,y:Math.random()*1200,
+  r:Math.random()*3+1,a:Math.random()*0.13+0.03,
+  vx:(Math.random()-0.5)*0.18,vy:-(Math.random()*0.12+0.04),
+  p:Math.random()*Math.PI*2
+}));
+const polvo = Array.from({length:50},()=>({
+  x:Math.random()*2000,y:Math.random()*1200,
+  r:Math.random()*2+0.4,a:Math.random()*0.16+0.03,
+  vx:(Math.random()-0.5)*0.22,vy:-(Math.random()*0.14+0.04),
+  h:Math.random()*30+305,p:Math.random()*Math.PI*2
 }));
 
-const motas = Array.from({length:30}, () => ({
-  x: Math.random()*2000, y: Math.random()*1200,
-  r: Math.random()*3+1, a: Math.random()*0.14+0.03,
-  vx: (Math.random()-0.5)*0.18, vy: -(Math.random()*0.12+0.04),
-  p: Math.random()*Math.PI*2,
+// Corazones flotantes en canvas
+const canvasHearts = Array.from({length:18},()=>({
+  x:Math.random()*2000,y:Math.random()*1200+200,
+  size:Math.random()*8+4,a:Math.random()*0.12+0.02,
+  vx:(Math.random()-0.5)*0.15,vy:-(Math.random()*0.18+0.06),
+  p:Math.random()*Math.PI*2,
+  hue:Math.random()*30+300
 }));
 
-const polvo = Array.from({length:45}, () => ({
-  x: Math.random()*2000, y: Math.random()*1200,
-  r: Math.random()*2+0.4, a: Math.random()*0.16+0.03,
-  vx: (Math.random()-0.5)*0.22, vy: -(Math.random()*0.14+0.04),
-  h: Math.random()*30+305, p: Math.random()*Math.PI*2,
-}));
+function drawHeart(cx,cy,size,color){
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.beginPath();
+  const s=size*0.045;
+  ctx.moveTo(0,-size*0.3);
+  ctx.bezierCurveTo(size*0.5,-size*0.8,size*1.0,-size*0.1,0,size*0.55);
+  ctx.bezierCurveTo(-size*1.0,-size*0.1,-size*0.5,-size*0.8,0,-size*0.3);
+  ctx.fillStyle=color; ctx.fill(); ctx.restore();
+}
 
-function spawnStar() {
+function spawnStar(){
   shootingStars.push({
-    x: Math.random()*W*0.6+W*0.1, y: Math.random()*H*0.5,
-    len: Math.random()*130+60, speed: Math.random()*5+4,
-    a: 0, life: 0, maxLife: Math.random()*55+40,
-    angle: Math.PI/5+(Math.random()-0.5)*0.4,
+    x:Math.random()*W*0.6+W*0.1,y:Math.random()*H*0.5,
+    len:Math.random()*130+60,speed:Math.random()*5+4,
+    a:0,life:0,maxLife:Math.random()*55+40,
+    angle:Math.PI/5+(Math.random()-0.5)*0.4
   });
 }
 
-function frame() {
-  t += 0.016;
+function frame(){
+  t+=0.016;
   ctx.clearRect(0,0,W,H);
-  const g = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.8);
-  g.addColorStop(0,'#0b0012'); g.addColorStop(0.5,'#06000a'); g.addColorStop(1,'#000');
-  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.8);
+  g.addColorStop(0,'#0c0014');g.addColorStop(0.5,'#07000c');g.addColorStop(1,'#000');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const ag=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,260);
+  ag.addColorStop(0,'rgba(180,50,130,0.08)');ag.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ag; ctx.fillRect(0,0,W,H);
 
-  const ag = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,250);
-  ag.addColorStop(0,'rgba(170,50,120,0.07)'); ag.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle = ag; ctx.fillRect(0,0,W,H);
+  const sx=W/2000,sy=H/1200;
 
-  const sx = W/2000, sy = H/1200;
-
-  stars.forEach(s => {
-    s.tp += s.ts; s.x += s.dx; s.y += s.dy;
-    if(s.x>2000)s.x=0; if(s.x<0)s.x=2000;
-    if(s.y>1200)s.y=0; if(s.y<0)s.y=1200;
-    const a = s.a*(0.55+0.45*Math.sin(s.tp));
-    ctx.beginPath(); ctx.arc(s.x*sx,s.y*sy,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fill();
-    if(s.r>1.15){
-      ctx.beginPath(); ctx.arc(s.x*sx,s.y*sy,s.r*2.8,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,255,255,${a*0.07})`; ctx.fill();
-    }
+  stars.forEach(s=>{
+    s.tp+=s.ts;s.x+=s.dx;s.y+=s.dy;
+    if(s.x>2000)s.x=0;if(s.x<0)s.x=2000;
+    if(s.y>1200)s.y=0;if(s.y<0)s.y=1200;
+    const a=s.a*(0.55+0.45*Math.sin(s.tp));
+    ctx.beginPath();ctx.arc(s.x*sx,s.y*sy,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fill();
+    if(s.r>1.15){ctx.beginPath();ctx.arc(s.x*sx,s.y*sy,s.r*2.8,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${a*0.07})`;ctx.fill();}
   });
-
-  motas.forEach(m => {
-    m.p+=0.017; m.x+=m.vx; m.y+=m.vy;
-    if(m.x>2000)m.x=0; if(m.x<0)m.x=2000;
-    if(m.y<0)m.y=1200; if(m.y>1200)m.y=0;
+  motas.forEach(m=>{
+    m.p+=0.017;m.x+=m.vx;m.y+=m.vy;
+    if(m.x>2000)m.x=0;if(m.x<0)m.x=2000;if(m.y<0)m.y=1200;if(m.y>1200)m.y=0;
     const a=m.a*(0.7+0.3*Math.sin(m.p));
-    ctx.beginPath(); ctx.arc(m.x*sx,m.y*sy,m.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fill();
+    ctx.beginPath();ctx.arc(m.x*sx,m.y*sy,m.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fill();
+  });
+  polvo.forEach(p=>{
+    p.p+=0.02;p.x+=p.vx+Math.sin(p.p)*0.28;p.y+=p.vy;
+    if(p.y<0)p.y=1200;if(p.x>2000)p.x=0;if(p.x<0)p.x=2000;
+    const a=p.a*(0.6+0.4*Math.sin(p.p));
+    ctx.beginPath();ctx.arc(p.x*sx,p.y*sy,p.r,0,Math.PI*2);ctx.fillStyle=`hsla(${p.h},80%,82%,${a})`;ctx.fill();
   });
 
-  polvo.forEach(p => {
-    p.p+=0.02; p.x+=p.vx+Math.sin(p.p)*0.28; p.y+=p.vy;
-    if(p.y<0)p.y=1200; if(p.x>2000)p.x=0; if(p.x<0)p.x=2000;
-    const a=p.a*(0.6+0.4*Math.sin(p.p));
-    ctx.beginPath(); ctx.arc(p.x*sx,p.y*sy,p.r,0,Math.PI*2);
-    ctx.fillStyle=`hsla(${p.h},80%,82%,${a})`; ctx.fill();
+  // Corazones flotantes
+  canvasHearts.forEach(h=>{
+    h.p+=0.018;h.x+=h.vx+Math.sin(h.p)*0.2;h.y+=h.vy;
+    if(h.y<-50)h.y=1250;if(h.x>2000)h.x=0;if(h.x<0)h.x=2000;
+    const a=h.a*(0.6+0.4*Math.sin(h.p));
+    drawHeart(h.x*sx,h.y*sy,h.size,`hsla(${h.hue},80%,78%,${a})`);
   });
 
   if(t-lastShoot>2.5+Math.random()*5){spawnStar();lastShoot=t;}
   for(let i=shootingStars.length-1;i>=0;i--){
     const s=shootingStars[i];
-    s.life++; s.x+=Math.cos(s.angle)*s.speed; s.y+=Math.sin(s.angle)*s.speed;
+    s.life++;s.x+=Math.cos(s.angle)*s.speed;s.y+=Math.sin(s.angle)*s.speed;
     const pr=s.life/s.maxLife;
     s.a=pr<0.2?pr/0.2:1-(pr-0.2)/0.8;
-    const tx=s.x-Math.cos(s.angle)*s.len, ty=s.y-Math.sin(s.angle)*s.len;
+    const tx=s.x-Math.cos(s.angle)*s.len,ty=s.y-Math.sin(s.angle)*s.len;
     const sg=ctx.createLinearGradient(tx,ty,s.x,s.y);
     sg.addColorStop(0,'rgba(255,255,255,0)');
     sg.addColorStop(0.7,`rgba(255,210,240,${s.a*0.45})`);
     sg.addColorStop(1,`rgba(255,255,255,${s.a})`);
-    ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(s.x,s.y);
-    ctx.strokeStyle=sg; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(s.x,s.y);
+    ctx.strokeStyle=sg;ctx.lineWidth=1.5;ctx.stroke();
     if(s.life>=s.maxLife)shootingStars.splice(i,1);
   }
   requestAnimationFrame(frame);
 }
 frame();
 
-// SVG pétalos
-const NS='http://www.w3.org/2000/svg', CX=210, CY=265;
+// ── SVG PÉTALOS ──────────────────────────────────────────────────────
+const NS='http://www.w3.org/2000/svg',CX=210,CY=265;
 
-function mkPetalo(container, cx, cy, rx, ry, rot, gid, opac, sc) {
-  const g = document.createElementNS(NS,'g');
+function mkPetalo(container,cx,cy,rx,ry,rot,gid,opac,sc){
+  const g=document.createElementNS(NS,'g');
   g.classList.add('petalo-g');
   g.style.transformOrigin=`${CX}px ${CY}px`;
-  g.style.transform=`rotate(${rot}deg) scale(0)`;
-  g.style.opacity='0';
-  const e = document.createElementNS(NS,'ellipse');
-  e.setAttribute('cx',cx); e.setAttribute('cy',cy);
-  e.setAttribute('rx',rx); e.setAttribute('ry',ry);
-  e.setAttribute('fill',`url(#${gid})`);
-  e.setAttribute('stroke',sc); e.setAttribute('stroke-width','0.6');
-  e.setAttribute('fill-opacity',opac);
+  g.style.transform=`rotate(${rot}deg) scale(0)`;g.style.opacity='0';
+  const e=document.createElementNS(NS,'ellipse');
+  e.setAttribute('cx',cx);e.setAttribute('cy',cy);e.setAttribute('rx',rx);e.setAttribute('ry',ry);
+  e.setAttribute('fill',`url(#${gid})`);e.setAttribute('stroke',sc);e.setAttribute('stroke-width','0.6');e.setAttribute('fill-opacity',opac);
   g.appendChild(e);
-  const v = document.createElementNS(NS,'path');
+  const v=document.createElementNS(NS,'path');
   v.setAttribute('d',`M${cx} ${cy+ry-8} Q${cx+rx*0.12} ${cy} ${cx} ${cy-ry+12}`);
-  v.setAttribute('stroke','rgba(255,255,255,0.2)');
-  v.setAttribute('stroke-width','0.9'); v.setAttribute('fill','none');
+  v.setAttribute('stroke','rgba(255,255,255,0.2)');v.setAttribute('stroke-width','0.9');v.setAttribute('fill','none');
   g.appendChild(v);
-  container.appendChild(g);
-  return g;
+  container.appendChild(g);return g;
 }
 
 const extC=document.getElementById('petalosExt');
 const medC=document.getElementById('petalosMed');
 const intC=document.getElementById('petalosInt');
-const extP=[], medP=[], intP=[];
-
+const extP=[],medP=[],intP=[];
 for(let i=0;i<8;i++) extP.push(mkPetalo(extC,CX,CY-68,14,50,i*45,i%2?'gP2':'gP1','0.92','rgba(180,55,115,0.3)'));
 for(let i=0;i<8;i++) medP.push(mkPetalo(medC,CX,CY-52,12,38,i*45+22.5,i%2?'gP2':'gP3','0.86','rgba(200,75,135,0.22)'));
 for(let i=0;i<6;i++) intP.push(mkPetalo(intC,CX,CY-36,10,23,i*60,'gP1','0.88','rgba(220,95,145,0.18)'));
 
 // Pistilos
-const pg = document.getElementById('pistiloG');
+const pg=document.getElementById('pistiloG');
 for(let i=0;i<20;i++){
-  const ang=(i/20)*Math.PI*2, r=15+(i%3)*4;
+  const ang=(i/20)*Math.PI*2,r=15+(i%3)*4;
   const dot=document.createElementNS(NS,'circle');
-  dot.setAttribute('cx',CX+Math.cos(ang)*r); dot.setAttribute('cy',CY+Math.sin(ang)*r);
-  dot.setAttribute('r',i%3===0?2.2:1.4);
-  dot.setAttribute('fill',i%3===0?'#ffe055':'#ffaa18');
+  dot.setAttribute('cx',CX+Math.cos(ang)*r);dot.setAttribute('cy',CY+Math.sin(ang)*r);
+  dot.setAttribute('r',i%3===0?2.2:1.4);dot.setAttribute('fill',i%3===0?'#ffe055':'#ffaa18');
   pg.appendChild(dot);
 }
 
@@ -302,34 +432,66 @@ const rg=document.getElementById('rocioG');
   g2.appendChild(c2);g2.appendChild(sh);rg.appendChild(g2);
 });
 
-const delay = ms => new Promise(r=>setTimeout(r,ms));
+// ── Flores secundarias ───────────────────────────────────────────────
+function buildMiniFlor(containerId, tintGrad){
+  const cont = document.getElementById(containerId);
+  if(!cont)return;
+  // tallo
+  const tl=document.createElementNS(NS,'path');
+  tl.setAttribute('d','M210 430 C207 398 204 365 208 335 C211 305 204 282 210 265');
+  tl.setAttribute('stroke','#3a8820');tl.setAttribute('stroke-width','8');tl.setAttribute('fill','none');tl.setAttribute('stroke-linecap','round');
+  cont.appendChild(tl);
+  // hoja
+  const hl=document.createElementNS(NS,'path');
+  hl.setAttribute('d','M200 340 C168 320 138 303 144 268 C164 284 188 306 200 340Z');
+  hl.setAttribute('fill','#4a9e30');cont.appendChild(hl);
+  // pétalos simples
+  for(let i=0;i<8;i++){
+    const g=document.createElementNS(NS,'g');
+    g.style.transformOrigin=`210px 265px`;
+    g.style.transform=`rotate(${i*45}deg)`;
+    const e=document.createElementNS(NS,'ellipse');
+    e.setAttribute('cx','210');e.setAttribute('cy','222');e.setAttribute('rx','12');e.setAttribute('ry','40');
+    e.setAttribute('fill',tintGrad);e.setAttribute('opacity','0.82');
+    g.appendChild(e);cont.appendChild(g);
+  }
+  // centro
+  const cc=document.createElementNS(NS,'circle');
+  cc.setAttribute('cx','210');cc.setAttribute('cy','265');cc.setAttribute('r','22');cc.setAttribute('fill','#f0b830');
+  cont.appendChild(cc);
+  const ci=document.createElementNS(NS,'circle');
+  ci.setAttribute('cx','210');ci.setAttribute('cy','265');ci.setAttribute('r','13');ci.setAttribute('fill','#c07010');
+  cont.appendChild(ci);
+}
+buildMiniFlor('florIzqG','#e8a0c8');
+buildMiniFlor('florDerG','#f0b0d0');
+
+// ── ANIMACIÓN ────────────────────────────────────────────────────────
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function animarFlor(){
   document.getElementById('pasto').style.cssText+='transition:opacity 0.8s ease;opacity:1;';
   await delay(450);
-
   ['tallo','talloD'].forEach((id,i)=>{
     const el=document.getElementById(id);
     el.style.transition=`stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1) ${i*0.1}s`;
     el.style.strokeDashoffset='0';
   });
   await delay(950);
-
   for(const id of ['hIzqG','hDerG','hIzqP']){
     const h=document.getElementById(id);
     h.style.transition='opacity 0.5s ease, transform 0.7s cubic-bezier(0.34,1.56,0.64,1)';
-    h.style.opacity='1'; h.style.transform='scale(1) rotate(0deg)';
+    h.style.opacity='1';h.style.transform='scale(1) rotate(0deg)';
     await delay(210);
   }
   await delay(280);
-
   document.getElementById('aura').style.opacity='1';
 
   for(let i=0;i<extP.length;i++){
     const p=extP[i];
     p.style.transition='opacity 0.45s ease, transform 0.55s cubic-bezier(0.34,1.56,0.64,1)';
     p.style.transformOrigin=`${CX}px ${CY}px`;
-    p.style.transform=`rotate(${i*45}deg) scale(1)`; p.style.opacity='1';
+    p.style.transform=`rotate(${i*45}deg) scale(1)`;p.style.opacity='1';
     await delay(88);
   }
   await delay(110);
@@ -337,7 +499,7 @@ async function animarFlor(){
     const p=medP[i];
     p.style.transition='opacity 0.4s ease, transform 0.5s cubic-bezier(0.34,1.56,0.64,1)';
     p.style.transformOrigin=`${CX}px ${CY}px`;
-    p.style.transform=`rotate(${i*45+22.5}deg) scale(1)`; p.style.opacity='1';
+    p.style.transform=`rotate(${i*45+22.5}deg) scale(1)`;p.style.opacity='1';
     await delay(72);
   }
   await delay(90);
@@ -345,7 +507,7 @@ async function animarFlor(){
     const p=intP[i];
     p.style.transition='opacity 0.35s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)';
     p.style.transformOrigin=`${CX}px ${CY}px`;
-    p.style.transform=`rotate(${i*60}deg) scale(1)`; p.style.opacity='1';
+    p.style.transform=`rotate(${i*60}deg) scale(1)`;p.style.opacity='1';
     await delay(60);
   }
   await delay(140);
@@ -353,67 +515,92 @@ async function animarFlor(){
   const cg=document.getElementById('centroG');
   cg.style.transition='opacity 0.5s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
   cg.style.transformOrigin=`${CX}px ${CY}px`;
-  cg.style.opacity='1'; cg.style.transform='scale(1)';
+  cg.style.opacity='1';cg.style.transform='scale(1)';
   await delay(280);
 
   document.getElementById('pistiloG').style.cssText+='transition:opacity 0.5s ease;opacity:1;';
   await delay(180);
   document.getElementById('rocioG').style.cssText+='transition:opacity 0.9s ease;opacity:1;';
-  await delay(380);
+  await delay(350);
 
-  document.getElementById('titulo').classList.add('visible');
-  document.getElementById('btnReplay').classList.add('visible');
+  // Flores secundarias
+  document.getElementById('florIzq').style.opacity='1';
+  await delay(200);
+  document.getElementById('florDer').style.opacity='1';
+  await delay(600);
+
+  // Lanzar corazones DOM flotantes
+  lanzarCorazones();
+  await delay(600);
+
+  // Mostrar footer
+  document.getElementById('footer').classList.add('show');
+  await delay(500);
+
+  // Auto-mostrar mensaje
+  mostrarMensaje();
+
   iniciarBreeze();
 }
 
-let breezeRunning=false;
+function lanzarCorazones(){
+  const emojis=['💕','🌸','✨','💖','🌷'];
+  for(let i=0;i<12;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='corazon-float';
+      el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left=(15+Math.random()*70)+'%';
+      el.style.bottom=(10+Math.random()*30)+'%';
+      el.style.fontSize=(14+Math.random()*14)+'px';
+      el.style.animationDuration=(2.8+Math.random()*2)+'s';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),5000);
+    },i*180);
+  }
+}
+
+let breezeOn=false;
 function iniciarBreeze(){
-  if(breezeRunning)return; breezeRunning=true;
+  if(breezeOn)return;breezeOn=true;
   let f=0;
   (function loop(){
     f++;
-    extP.forEach((p,i)=>{
-      const w=Math.sin(f*0.016+i*0.7)*1.6;
-      p.style.transform=`rotate(${i*45+w}deg) scale(1)`;
-      p.style.transformOrigin=`${CX}px ${CY}px`;
-    });
-    medP.forEach((p,i)=>{
-      const w=Math.sin(f*0.018+i*0.8)*1.4;
-      p.style.transform=`rotate(${i*45+22.5+w}deg) scale(1)`;
-      p.style.transformOrigin=`${CX}px ${CY}px`;
-    });
-    intP.forEach((p,i)=>{
-      const w=Math.sin(f*0.022+i*1.0)*1.0;
-      p.style.transform=`rotate(${i*60+w}deg) scale(1)`;
-      p.style.transformOrigin=`${CX}px ${CY}px`;
-    });
+    extP.forEach((p,i)=>{const w=Math.sin(f*0.016+i*0.7)*1.6;p.style.transform=`rotate(${i*45+w}deg) scale(1)`;p.style.transformOrigin=`${CX}px ${CY}px`;});
+    medP.forEach((p,i)=>{const w=Math.sin(f*0.018+i*0.8)*1.4;p.style.transform=`rotate(${i*45+22.5+w}deg) scale(1)`;p.style.transformOrigin=`${CX}px ${CY}px`;});
+    intP.forEach((p,i)=>{const w=Math.sin(f*0.022+i*1.0)*1.0;p.style.transform=`rotate(${i*60+w}deg) scale(1)`;p.style.transformOrigin=`${CX}px ${CY}px`;});
     requestAnimationFrame(loop);
   })();
 }
 
+function mostrarMensaje(){
+  const ov=document.getElementById('mensajeOverlay');
+  const card=document.getElementById('mensajeCard');
+  ov.classList.add('show');
+  setTimeout(()=>card.classList.add('show'),80);
+  lanzarCorazones();
+}
+
+function cerrarMensaje(){
+  const ov=document.getElementById('mensajeOverlay');
+  const card=document.getElementById('mensajeCard');
+  card.classList.remove('show');
+  setTimeout(()=>ov.classList.remove('show'),500);
+}
+
 function resetYAnimar(){
-  breezeRunning=false;
-  ['tallo','talloD'].forEach(id=>{
-    const el=document.getElementById(id);
-    el.style.transition='none'; el.style.strokeDashoffset='320';
-  });
-  ['hIzqG','hDerG','hIzqP'].forEach(id=>{
-    const h=document.getElementById(id);
-    h.style.transition='none'; h.style.opacity='0'; h.style.transform='scale(0)';
-  });
+  breezeOn=false;
+  ['tallo','talloD'].forEach(id=>{const el=document.getElementById(id);el.style.transition='none';el.style.strokeDashoffset='320';});
+  ['hIzqG','hDerG','hIzqP'].forEach(id=>{const h=document.getElementById(id);h.style.transition='none';h.style.opacity='0';h.style.transform='scale(0)';});
   extP.forEach((p,i)=>{p.style.transition='none';p.style.opacity='0';p.style.transform=`rotate(${i*45}deg) scale(0)`;});
   medP.forEach((p,i)=>{p.style.transition='none';p.style.opacity='0';p.style.transform=`rotate(${i*45+22.5}deg) scale(0)`;});
   intP.forEach((p,i)=>{p.style.transition='none';p.style.opacity='0';p.style.transform=`rotate(${i*60}deg) scale(0)`;});
-  ['centroG','pistiloG','rocioG'].forEach(id=>{
-    const el=document.getElementById(id);
-    el.style.transition='none'; el.style.opacity='0';
-    if(id==='centroG')el.style.transform='scale(0)';
-  });
-  document.getElementById('centroG').style.transformOrigin=`${CX}px ${CY}px`;
+  ['centroG','pistiloG','rocioG'].forEach(id=>{const el=document.getElementById(id);el.style.transition='none';el.style.opacity='0';if(id==='centroG'){el.style.transform='scale(0)';el.style.transformOrigin=`${CX}px ${CY}px`;}});
   document.getElementById('aura').style.opacity='0';
   document.getElementById('pasto').style.opacity='0';
-  document.getElementById('titulo').classList.remove('visible');
-  document.getElementById('btnReplay').classList.remove('visible');
+  document.getElementById('florIzq').style.opacity='0';
+  document.getElementById('florDer').style.opacity='0';
+  document.getElementById('footer').classList.remove('show');
   setTimeout(animarFlor,80);
 }
 
